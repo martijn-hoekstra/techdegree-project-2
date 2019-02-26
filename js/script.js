@@ -22,7 +22,39 @@ const ul = document.querySelector('.student-list');
 const list = ul.children;
 let amountPerPage = 10;
 let amountOfPages = Math.ceil(list.length / amountPerPage);
+const searchStudents = (list) => {
+  const pageHeader = container.firstElementChild;
+  const studentSearchDiv = document.createElement('div');
+  studentSearchDiv.className = 'student-search';
+  const searchInput = document.createElement('input');
+  searchInput.placeholder = 'Search for students...';
+  studentSearchDiv.appendChild(searchInput);
+  const searchButton = document.createElement('button');
+  searchButton.textContent = 'Search';
+  studentSearchDiv.appendChild(searchButton);
+  pageHeader.appendChild(studentSearchDiv);
 
+  const filterList = () => {
+    let searchValue = searchInput.value.toLowerCase();
+    for(let i = 0; i < list.length; i++) {
+      let student = list[i];
+      let studentName = student.querySelector('h3').textContent.toLowerCase();
+      let studentEmail = student.querySelector('.email').textContent.toLowerCase();
+
+      if(studentName.includes(searchValue) || studentEmail.includes(searchValue)) {
+        console.log(studentName.search(searchValue));
+        list[i].style.display = '';
+      } else {
+        list[i].style.display = 'none';
+      }
+    }
+  };
+
+  searchInput.addEventListener('keyup', filterList);
+  searchButton.addEventListener('click', filterList);
+
+};
+searchStudents(list);
 /***
    Create the `showPage` function to hide all of the items in the
    list except for the ten you want to show.
@@ -97,8 +129,9 @@ const appendPageLinks = (list) => {
 };
 appendPageLinks(list);
 
-const searchList = (list) => {
-  
-};
+
+
+
+
 
 // Remember to delete the comments that came with this file, and replace them with your own code comments.
