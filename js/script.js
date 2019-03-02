@@ -57,12 +57,20 @@ const searchStudents = list => {
     hideAllStudents(listOfStudents);
 
     // Display students on page
-    let page = showPage(students, 1);
-    if(page) {
+    let page = showPage(students);
+    if(students.length) {
       for(let i = 0; i < page.length; i++) {
         page[i].style.display = '';
       }
       appendPageLinks(students);
+    } else {
+      appendPageLinks(students);
+      const div = document.createElement('div');
+      const noResultsMessage = `<p>We couldn't find any results for "${searchInput.value}".</p>`;
+      div.innerHTML = noResultsMessage;
+      div.id = 'no_results';
+      div.style.textAlign = 'center';
+      container.appendChild(div);
     }
   };
 
@@ -89,8 +97,6 @@ const showPage = (list, page = 1) => {
         }
       }
       return students;
-    } else {
-      alert('test');
     }
 };
 
@@ -109,6 +115,9 @@ const hideAllStudents = list => {
 ***/
 
 const appendPageLinks = list => {
+  if(document.getElementById('no_results')) {
+    container.removeChild(document.getElementById('no_results'));
+  }
   pagination.innerHTML = '';
   const amountOfPages = Math.ceil(list.length / amountPerPage);
   const listLength = list.length;
@@ -124,18 +133,17 @@ const appendPageLinks = list => {
       pagination.appendChild(li);
     }
 
-    let page = showPage(list, 1);
+    let page = showPage(list);
     for(let i = 0; i < page.length; i++) {
       page[i].style.display = '';
     }
-
-    const allLinks = pagination.getElementsByTagName('a');
-    const allLinksLength = allLinks.length;
 
     // Add click event listener to every pagination button
     pagination.addEventListener('click', (e) => {
       const element = e.target;
       const pageNumber = e.target.textContent;
+      const allLinks = pagination.getElementsByTagName('a');
+      const allLinksLength = allLinks.length;
       if(e.target.tagName === 'A') {
         // Remove all 'active' classes on pagination buttons
         for(let i = 0; i < allLinksLength; i++) {
