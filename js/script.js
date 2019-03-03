@@ -1,16 +1,35 @@
 /***
-   Select and create important elements
+   Creates an element based on four parameters:
+   1. The name of the element, for example 'div'
+   2. What element to append it to (the parent) (optional)
+   3. The textContent of the element (optional)
+   4. The class name to be used (optional)
+***/
+
+const createElement = (elementName, appendTo, text, className) => {
+  let element = document.createElement(elementName);
+  if(appendTo !== undefined) {
+    appendTo.appendChild(element);
+  }
+  if(text !== undefined && text !== '') {
+    element.textContent = text;
+  }
+  if(className !== undefined && className !== '') {
+    element.className = className;
+  }
+  return element;
+};
+
+
+/***
+   Select and create important elements for use further in the script
 ***/
 
 const container = document.querySelector('.page');
 const ul = container.querySelector('.student-list');
 const listOfStudents = ul.children;
-
-const div = document.createElement('div');
-const pagination = document.createElement('ul');
-pagination.className = 'pagination';
-div.appendChild(pagination);
-container.appendChild(div);
+const div = createElement('div', container);
+const pagination = createElement('ul', div, '', 'pagination');
 
 // Sets the amount of students displayed on one page
 let amountPerPage = 10;
@@ -24,17 +43,12 @@ let amountPerPage = 10;
 const searchStudents = list => {
   // Create and append search input and search button
   const pageHeader = container.firstElementChild;
-  const studentSearchDiv = document.createElement('div');
-  studentSearchDiv.className = 'student-search';
-  const searchInput = document.createElement('input');
+  const studentSearchDiv = createElement('div', pageHeader, '','student-search');
+  const searchInput = createElement('input', studentSearchDiv);
   searchInput.placeholder = 'Search for students...';
-  studentSearchDiv.appendChild(searchInput);
-  const searchButton = document.createElement('button');
-  searchButton.textContent = 'Search';
-  studentSearchDiv.appendChild(searchButton);
-  pageHeader.appendChild(studentSearchDiv);
+  const searchButton = createElement('button', studentSearchDiv, 'Search');
 
-  // Filters students
+  // Filters students based on input value
   const filterList = () => {
     let students = [];
     const searchValue = searchInput.value.toLowerCase();
@@ -49,6 +63,8 @@ const searchStudents = list => {
                         .textContent
                         .toLowerCase();
 
+      // Search through both the name and email and adds the student to the array
+      // if there are matching values
       if(studentName.includes(searchValue) || studentMail.includes(searchValue)) {
         students.push(student);
       }
@@ -56,7 +72,8 @@ const searchStudents = list => {
     // Hide all students
     hideAllStudents(listOfStudents);
 
-    // Display students on page
+    // Display students on page if showPage() returns an array,
+    // otherwise display to the user no results were found.
     let page = showPage(students);
     if(students.length) {
       for(let i = 0; i < page.length; i++) {
@@ -65,15 +82,15 @@ const searchStudents = list => {
       appendPageLinks(students);
     } else {
       appendPageLinks(students);
-      const div = document.createElement('div');
+      const div = createElement('div', container);
       const noResultsMessage = `<p>We couldn't find any results for "${searchInput.value}".</p>`;
       div.innerHTML = noResultsMessage;
       div.id = 'no_results';
       div.style.textAlign = 'center';
-      container.appendChild(div);
     }
   };
 
+  // Event listeners for both the search textfield and the button
   searchInput.addEventListener('keyup', filterList);
   searchButton.addEventListener('click', filterList);
 };
@@ -84,12 +101,16 @@ const searchStudents = list => {
 ***/
 
 const showPage = (list, page = 1) => {
+    // Calculate the indexes of the students that
+    // needs to be displayed
     const lastItem = page * amountPerPage;
     const firstItem = lastItem - amountPerPage;
+
     const listLength = list.length;
     let students = [];
 
-    // Loop over items in the list parameter
+    // Loop over students in the list parameter and add
+    // them to the students array if the conditions apply
     if(listLength) {
       for(let i = 0; i < listLength; i++) {
         if(i >= firstItem && i < lastItem) {
@@ -100,7 +121,7 @@ const showPage = (list, page = 1) => {
     }
 };
 
-// Hide all students
+// Hides all students
 const hideAllStudents = list => {
   for(let i = 0; i < list.length; i++) {
     list[i].style.display = 'none';
@@ -109,30 +130,32 @@ const hideAllStudents = list => {
 
 
 /***
-   Create pagination buttons where every button will listen
+   Create pagination buttons where every button will
    trigger a click event and loads a new page of students based
    on the page number that's been clicked.
 ***/
 
 const appendPageLinks = list => {
+  // Checks if the 'no results' message is displayed,
+  // and removes if it is
   if(document.getElementById('no_results')) {
     container.removeChild(document.getElementById('no_results'));
   }
   pagination.innerHTML = '';
+
+  // Calculate how many pages there needs to be
   const amountOfPages = Math.ceil(list.length / amountPerPage);
   const listLength = list.length;
 
   if(listLength > amountPerPage) {
     // Create and append pagination buttons
     for(let i = 0; i < amountOfPages; i++) {
-      const li = document.createElement('li');
-      const link = document.createElement('a');
-      link.textContent = i + 1;
+      const li = createElement('li', pagination);
+      const link = createElement('a', li, i + 1);
       link.style.cursor = 'pointer';
-      li.appendChild(link);
-      pagination.appendChild(li);
     }
 
+    // Display the first page
     let page = showPage(list);
     for(let i = 0; i < page.length; i++) {
       page[i].style.display = '';
@@ -158,6 +181,8 @@ const appendPageLinks = list => {
         for(let i = 0; i < page.length; i++) {
           page[i].style.display = '';
         }
+
+        // Set clicked button's class to active
         e.target.className = 'active';
       }
     });
